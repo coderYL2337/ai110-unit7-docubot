@@ -1,3 +1,7 @@
+## Project Summary
+
+This project centers on building a retrieval-augmented DocuBot that answers questions using project documentation. The core concept students needed to understand is how to design and implement a retrieval system that indexes, scores, and returns relevant document snippets, and how to integrate this with an LLM for grounded answers. Students are most likely to struggle with chunking documents effectively, tuning relevance scoring, and ensuring the system refuses to answer when evidence is lacking. AI was helpful for generating code templates, suggesting improvements, and explaining retrieval strategies, but could be misleading when it hallucinated answers or failed to respect evidence constraints. One way I would guide a student is by prompting them to test their system with edge cases and to reflect on why certain queries fail, rather than giving away the solution. This encourages deeper understanding of retrieval design and responsible use of LLMs. Overall, the project highlights the importance of evidence-based answers and the limitations of both retrieval and generative AI.
+
 # DocuBot
 
 DocuBot is a small documentation assistant that helps answer developer questions about a codebase.  

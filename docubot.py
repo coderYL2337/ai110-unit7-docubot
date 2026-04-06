@@ -170,10 +170,22 @@ class DocuBot:
         """
         Retrieval only mode.
         Returns relevant sections and filenames (with section number) with no LLM involved.
+        Refuses to answer if no chunk contains at least 2 query tokens or a minimum score threshold.
         """
         snippets = self.retrieve(query, top_k=top_k)
 
-        if not snippets:
+        # Guardrail: require at least one chunk with 2+ query tokens matched or score >= 2
+        import string
+        query_tokens = set(query.lower().translate(str.maketrans('', '', string.punctuation)).split())
+        found_evidence = False
+        for filename, section, section_id in snippets:
+            section_tokens = set(section.lower().translate(str.maketrans('', '', string.punctuation)).split())
+            overlap = len(query_tokens & section_tokens)
+            score = self.score_document(query, section)
+            if overlap >= 2 or score >= 2:
+                found_evidence = True
+                break
+        if not found_evidence:
             return "I do not know based on these docs."
 
         formatted = []
@@ -187,6 +199,7 @@ class DocuBot:
         RAG mode.
         Uses student retrieval to select snippets, then asks Gemini
         to generate an answer using only those snippets.
+        Refuses to answer if no chunk contains at least 2 query tokens or a minimum score threshold.
         """
         if self.llm_client is None:
             raise RuntimeError(
@@ -195,7 +208,18 @@ class DocuBot:
 
         snippets = self.retrieve(query, top_k=top_k)
 
-        if not snippets:
+        # Guardrail: require at least one chunk with 2+ query tokens matched or score >= 2
+        import string
+        query_tokens = set(query.lower().translate(str.maketrans('', '', string.punctuation)).split())
+        found_evidence = False
+        for filename, section, section_id in snippets:
+            section_tokens = set(section.lower().translate(str.maketrans('', '', string.punctuation)).split())
+            overlap = len(query_tokens & section_tokens)
+            score = self.score_document(query, section)
+            if overlap >= 2 or score >= 2:
+                found_evidence = True
+                break
+        if not found_evidence:
             return "I do not know based on these docs."
 
         # Pass only the section text and filename to the LLM client
